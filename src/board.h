@@ -5,17 +5,20 @@
 #include <stdexcept>
 #include <ostream>
 #include <vector>
+#include <cmath>
 
 #include "piece.h"
 #include "checker.h"
 #include "king.h"
 
+#define S 8
+
 using std::ostream;
 using std::vector;
+using std::abs;
 
 namespace Checkers {
 
-  template <size_t S>
   class Board {
     public:
 
@@ -36,7 +39,7 @@ namespace Checkers {
           Spot(size_t x=1, size_t y=1, Piece* piece = nullptr)
           : x_(x), y_(y), piece_(piece) { if (!valid()) throw std::out_of_range("Board spot out of bounds"); }
 
-          Spot(const Spot& other): Spot(other.x_, other.y_, other.piece_->copy()) {}
+          Spot(const Spot& other): Spot(other.x_, other.y_, other.piece_ ? other.piece_->copy() : nullptr) { }
           Spot(Spot&& other): Spot(other.x_, other.y_, other.piece_) { other.piece_ = nullptr; }
 
           ~Spot() { remove_piece(); }
@@ -47,22 +50,26 @@ namespace Checkers {
           /*  Removes piece from other spot and stores it in current spot;
            *  Returns current spot (allows chaining).
            */
-          Spot& operator<< (Spot& other) { remove_piece(); piece_ = other.retrive_piece(); return *this; }
+          Spot& operator<< (Spot& other);
 
           /*  Removes piece from current spot and stores it in other spot;
            *  Returns other spot (allows chaining).
            */
-          Spot& operator>> (Spot& other) { other.remove_piece(); other.piece_ = retrive_piece(); return other; }
+          Spot& operator>> (Spot& other);
 
           /* Two spots are equal if they have the same coordinates;
            * The pieces each of them hold are irrelevant for equality.
            */
-          bool operator== (const Spot& other) { return x_ == other.x_ && y == other.y_; }
+          bool operator== (const Spot& other) const { return x_ == other.x_ && y_ == other.y_; }
 
           bool allowed() const { return color() == ColorType::dark; }
 
-          size_t x() const { return x_; }
-          size_t y() const { return y_; }
+          bool empty() const { return piece_ == nullptr; }
+
+          bool occupied() const { return !empty(); }
+
+          int x() const { return (int)x_; }
+          int y() const { return (int)y_; }
 
           /* Returns color of currrent spot, which only depends on the coordinates.
            */
@@ -88,14 +95,38 @@ namespace Checkers {
       };
 
       class Move {
-        private:
-          Spot& source_;
-          Spot& dest_;
         public:
-          Move(Spot& s, Spot& d): source_(s), dest_(d) {}
-          Spot& source() { return source_; }
-          Spot& dest() { return dest_; }
-          bool valid();
+          enum class DirectionType { forward, backwards };
+        private:
+          Spot source_;
+          Spot dest_;
+
+          int x_delta() const { return dest_.x() - source_.x(); }
+          int y_delta() const { return dest_.y() - source_.y(); }
+          bool is_horizonatal() const { return source_.y() == dest_.y(); }
+          bool is_vertical() const { return source_.x() == dest_.x(); }
+
+          bool is_diagonal() const { 
+            // Two spots are on the same diagonal iff the sum or difference of their indexes are equal
+            return source_.y() - source_.x() == dest_.y() - dest_.x() ||
+                   source_.y() + source_.x() == dest_.y() + dest_.x();
+          }
+          
+          DirectionType direction() const { 
+            return (source_.piece()->direction() == Piece::DirectionType::up) ?
+                   (y_delta() > 0 ? DirectionType::forward : DirectionType::backwards) :
+                   (y_delta() < 0 ? DirectionType::forward : DirectionType::backwards);
+          }
+
+          bool forwards() const { return direction() == DirectionType::forward; }
+
+          bool backwards() const { return direction() == DirectionType::backwards; }
+
+        public:
+          Move(const Spot& s, const Spot& d): source_(s), dest_(d) { }
+          Spot source() const { return source_; }
+          Spot dest() const { return dest_; }
+          bool valid() const;
       };
 
     private:
@@ -109,59 +140,20 @@ namespace Checkers {
       // TODO: validate input
       Spot& spot(size_t x, size_t y) { return spot_[x][y]; }
 
+      // TODO: validate input
+      vector<Move> valid_moves_from(size_t x, size_t y);
+
+      void move(size_t srcx, size_t srcy, size_t dstx, size_t dsty);
 
   };
 
 };
 
 
-template <size_t S> ostream& operator<< (ostream&, Checkers::Board<S>&);
+ostream& operator<< (ostream&, Checkers::Board&);
 
+ostream& operator<< (ostream&, const typename Checkers::Board::Spot&);
 
-/* TEMPLATE IMPLEMENTATIONS */
-
-template <size_t S> typename Checkers::Board<S>::Spot& Checkers::Board<S>::Spot::operator= (const Spot& other) { 
-  x_ = other.x_; 
-  y_ = other.y_; 
-  remove_piece();
-  piece_ = other.piece_->copy(); 
-  return *this;
-}
-
-template <size_t S> typename Checkers::Board<S>::Spot& Checkers::Board<S>::Spot::operator= (Spot&& other) { 
-  x_ = other.x_; 
-  y_ = other.y_; 
-  remove_piece();
-  piece_ = other.retrive_piece();
-  return *this;
-}
-
-template <size_t S> Checkers::Board<S>::Board() {
-  for(int x = 0; x != S; ++x) {
-    for(int y = 0; y!= S; ++y) {
-      spot_[x][y] = Spot(x,y);
-      if(y < 3 && spot_[x][y].allowed()) 
-        spot_[x][y].insert_piece(new Checker(Piece::ColorType::dark));
-      if(y >= S-3 && spot_[x][y].allowed())
-        spot_[x][y].insert_piece(new Checker(Piece::ColorType::light));
-    }
-  }
-}
-
-
-template <size_t S> ostream& operator<< (ostream& os, Checkers::Board<S>& board) {
-  for(int y = S-1; y != -1; --y) {
-    if(y == S-1) {
-      for(int x = 0; x != S; ++x) os << (x ? "-" : "|-") << "-" << "-|";
-      os << std::endl;
-    }
-    for(int x = 0; x != S; ++x) os << (x ? " " : "| ") << board.spot(x,y).piece() << " |";
-    os << std::endl;
-    for(int x = 0; x != S; ++x) os << (x ? "-" : "|-") << "-" << "-|";
-    os << std::endl;
-  }
-  return os;
-}
-
+ostream& operator<< (ostream&, const typename Checkers::Board::Move&);
 
 #endif
