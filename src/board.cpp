@@ -3,14 +3,12 @@
 #include <iostream>
 
 typename Checkers::Board::Spot& Checkers::Board::Spot::operator<< (Spot& other) { 
-  if(!Move(other, *this).valid()) throw std::invalid_argument("Invalid movement!");
   remove_piece(); 
   piece_ = other.retrive_piece(); 
   return *this; 
 }
 
 typename Checkers::Board::Spot& Checkers::Board::Spot::operator>> (Spot& other) { 
-  if(!Move(*this, other).valid()) throw std::invalid_argument("Invalid movement!");
   other.remove_piece(); 
   other.piece_ = retrive_piece(); 
   return other; 
@@ -70,14 +68,21 @@ ostream& operator<< (ostream& os, const typename Checkers::Board::Move& move) {
 
 bool Checkers::Board::Move::valid() const {
   if(!is_diagonal()) return false;
-  if(!dest().empty()) return false;
-  if(source().empty()) return false;
+  if(!dest_.empty()) return false;
+  if(source_.empty()) return false;
 
-  if(!source().piece()->allows_backwards() && backwards()) return false;
+  if(!source_.piece()->allows_backwards() && backwards()) return false;
 
-  if(!source().piece()->allows_bishop_movement() && abs(y_delta()) != 1) return false;
+  if(killed_) return true;
+
+  if(!source_.piece()->allows_bishop_movement() && abs(y_delta()) != 1) return false;
 
   return true;
+}
+
+void Checkers::Board::Move::perform() {
+  source_ >> dest_;
+  kill();
 }
 
 vector<typename Checkers::Board::Move> Checkers::Board::valid_moves_from(size_t xs, size_t ys) {
@@ -92,9 +97,22 @@ vector<typename Checkers::Board::Move> Checkers::Board::valid_moves_from(size_t 
   return valid_moves;
 }
 
-void Checkers::Board::move(size_t srcx, size_t srcy, size_t dstx, size_t dsty) {
-  Spot& source = spot(srcx, srcy);
-  Spot& dest = spot(dstx, dsty);
-  if(!Move(source, dest).valid()) throw std::invalid_argument("Invalid movement!");
-  dest << source;
+void Checkers::Board::move(std::string src, std::string des) {
+  Move move(spot(src), spot(des));
+  // Check for piece to kill
+  if(abs(move.x_delta()) == 2 && abs(move.y_delta()) == 2) {
+    Spot& next_spot = delta(spot(src), move.x_delta()/2, move.y_delta()/2);
+    if(next_spot.piece()) move.set_killed(&next_spot);
+  }
+  // Perform movement
+  if(move.valid()) move.perform();
+  else throw std::invalid_argument("Invalid move!");
+}
+
+typename Checkers::Board::Spot& Checkers::Board::spot(std::string pos) {
+  if(pos.size() != 2) 
+    throw std::invalid_argument("Position must given in algebraic notation by one character and one letter: e.g. c5.");
+  size_t x = (pos[0]-'a');
+  size_t y = (pos[1]-'1');
+  return spot(x, y);
 }

@@ -98,12 +98,20 @@ namespace Checkers {
         public:
           enum class DirectionType { forward, backwards };
         private:
-          Spot source_;
-          Spot dest_;
+          Spot& source_;
+          Spot& dest_;
+
+          Spot* killed_;
+        
+        public:
+          Move(Spot& s, Spot& d): source_(s), dest_(d), killed_(nullptr) { }
 
           int x_delta() const { return dest_.x() - source_.x(); }
+          
           int y_delta() const { return dest_.y() - source_.y(); }
+          
           bool is_horizonatal() const { return source_.y() == dest_.y(); }
+          
           bool is_vertical() const { return source_.x() == dest_.x(); }
 
           bool is_diagonal() const { 
@@ -122,11 +130,17 @@ namespace Checkers {
 
           bool backwards() const { return direction() == DirectionType::backwards; }
 
-        public:
-          Move(const Spot& s, const Spot& d): source_(s), dest_(d) { }
           Spot source() const { return source_; }
+          
           Spot dest() const { return dest_; }
+          
           bool valid() const;
+
+          void set_killed(Spot* s) { killed_ = s; }
+          
+          void kill() { if(killed_) killed_->remove_piece(); }
+          
+          void perform();
       };
 
     private:
@@ -141,9 +155,19 @@ namespace Checkers {
       Spot& spot(size_t x, size_t y) { return spot_[x][y]; }
 
       // TODO: validate input
+      Spot& spot(std::string pos);
+
+      /* Returns reference to the spot dx units up and dy units right
+       * Allows negative and posive deltas from src
+       * TODO: validate input
+       */
+      Spot& delta(Spot& src, int dx, int dy) { return spot(src.x() + dx, src.y() + dy); }
+
+      // TODO: validate input
       vector<Move> valid_moves_from(size_t x, size_t y);
 
-      void move(size_t srcx, size_t srcy, size_t dstx, size_t dsty);
+      // TODO: validate input
+      void move(std::string src, std::string des);
 
   };
 
