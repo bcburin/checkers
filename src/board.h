@@ -167,8 +167,10 @@ namespace Checkers {
       // TODO: validate input
       vector<Move> valid_moves_from(size_t x, size_t y);
 
-      // TODO: validate input
       void move(std::string src, std::string des);
+
+      // TODO: validate input
+      void move(Move& move);
 
       void print(ostream& os = std::cout, bool first_time = false);
 

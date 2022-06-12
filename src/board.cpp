@@ -100,14 +100,19 @@ vector<typename Checkers::Board::Move> Checkers::Board::valid_moves_from(size_t 
 }
 
 void Checkers::Board::move(std::string src, std::string des) {
-  Move move(spot(src), spot(des));
+  Move movement(spot(src), spot(des));
+  move(movement);
+}
+
+void Checkers::Board::move(typename Checkers::Board::Move& m) {
   // Check for piece to kill
-  if(abs(move.x_delta()) == 2 && abs(move.y_delta()) == 2) {
-    Spot& next_spot = delta(spot(src), move.x_delta()/2, move.y_delta()/2);
-    if(next_spot.piece()) move.set_killed(&next_spot);
+  if(abs(m.x_delta()) == 2 && abs(m.y_delta()) == 2) {
+    Spot& src = spot(m.source().x(), m.source().y());
+    Spot& next_spot = delta(src, m.x_delta()/2, m.y_delta()/2);
+    if(next_spot.piece()) m.set_killed(&next_spot);
   }
   // Perform movement
-  if(move.valid()) move.perform();
+  if(m.valid()) m.perform();
   else throw std::invalid_argument("Invalid move!");
 }
 
