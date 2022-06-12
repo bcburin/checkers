@@ -12,7 +12,7 @@
 #include "king.h"
 
 #define S 8
-#define DELETE_ANSI "\x1b[17A"
+// #define DELETE_ANSI "\x1b[17A"
 
 using std::ostream;
 using std::vector;

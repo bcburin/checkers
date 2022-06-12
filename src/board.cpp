@@ -42,9 +42,6 @@ Checkers::Board::Board() {
 }
 
 void Checkers::Board::print(ostream& os, bool first_time) {
-  if(!first_time) {
-    os << DELETE_ANSI;
-  }
   os << *this;
 }
 
