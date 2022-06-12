@@ -3,7 +3,7 @@
 
 #include <utility>
 #include <stdexcept>
-#include <ostream>
+#include <iostream>
 #include <vector>
 #include <cmath>
 
@@ -12,6 +12,7 @@
 #include "king.h"
 
 #define S 8
+#define DELETE_ANSI "\x1b[17A"
 
 using std::ostream;
 using std::vector;
@@ -168,6 +169,8 @@ namespace Checkers {
 
       // TODO: validate input
       void move(std::string src, std::string des);
+
+      void print(ostream& os = std::cout, bool first_time = false);
 
   };
 

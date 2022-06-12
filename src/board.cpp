@@ -1,6 +1,5 @@
 #include "board.h"
-
-#include <iostream>
+#include <sstream>
 
 typename Checkers::Board::Spot& Checkers::Board::Spot::operator<< (Spot& other) { 
   remove_piece(); 
@@ -42,6 +41,13 @@ Checkers::Board::Board() {
   }
 }
 
+void Checkers::Board::print(ostream& os, bool first_time) {
+  if(!first_time) {
+    os << DELETE_ANSI;
+  }
+  os << *this;
+}
+
 ostream& operator<< (ostream& os, Checkers::Board& board) {
   for(int y = S-1; y != -1; --y) {
     if(y == S-1) {
@@ -55,7 +61,6 @@ ostream& operator<< (ostream& os, Checkers::Board& board) {
   }
   return os;
 }
-
 
 ostream& operator<< (ostream& os, const typename Checkers::Board::Spot& spot) {
   return os << (char)('a' + spot.x()) << (spot.y() + 1);
