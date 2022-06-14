@@ -93,6 +93,8 @@ namespace Checkers {
            * Returns referentce to current spot (allows chaining).
            */
           Spot& insert_piece(Piece* piece) { remove_piece(); piece_ = piece; return *this; }
+
+          void promote_piece();
       };
 
       class Move {
@@ -134,8 +136,12 @@ namespace Checkers {
           Spot source() const { return source_; }
           
           Spot dest() const { return dest_; }
+
+          Spot& source_ref() { return source_; }
+
+          Spot& dest_ref() { return dest_; }
           
-          bool valid() const;
+          void validate() const;
 
           void set_killed(Spot* s) { killed_ = s; }
           

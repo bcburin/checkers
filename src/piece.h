@@ -2,6 +2,7 @@
 #define CHECKERS_PIECE_H
 
 #include <ostream>
+#include <string>
 
 using std::ostream;
 
@@ -19,6 +20,7 @@ namespace Checkers {
       ColorType color() const { return color_; }
       DirectionType direction() const { return color_ == ColorType::dark ? DirectionType::up : DirectionType::down; }
       virtual Piece* copy() const = 0;
+      virtual std::string str() const = 0;
       virtual bool allows_backwards() const = 0;
       virtual bool allows_bishop_movement() const = 0;
   };
