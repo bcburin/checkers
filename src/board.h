@@ -105,9 +105,11 @@ namespace Checkers {
           Spot& dest_;
 
           Spot* killed_;
+
+          Board& board_;
         
         public:
-          Move(Spot& s, Spot& d): source_(s), dest_(d), killed_(nullptr) { }
+          Move(Spot& s, Spot& d, Board& b): source_(s), dest_(d), killed_(nullptr), board_(b) { }
 
           int x_delta() const { return dest_.x() - source_.x(); }
           
@@ -136,14 +138,10 @@ namespace Checkers {
           Spot source() const { return source_; }
           
           Spot dest() const { return dest_; }
-
-          Spot& source_ref() { return source_; }
-
-          Spot& dest_ref() { return dest_; }
           
-          void validate() const;
+          void validate();
 
-          void set_killed(Spot* s) { killed_ = s; }
+          void check_kill();
           
           void kill() { if(killed_) killed_->remove_piece(); }
           
@@ -172,11 +170,6 @@ namespace Checkers {
 
       // TODO: validate input
       vector<Move> valid_moves_from(size_t x, size_t y);
-
-      void move(std::string src, std::string des);
-
-      // TODO: validate input
-      void move(Move& move);
 
       void print(ostream& os = std::cout, bool first_time = false);
 

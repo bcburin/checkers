@@ -77,21 +77,41 @@ ostream& operator<< (ostream& os, const typename Checkers::Board::Move& move) {
   return os << move.source() << " -> " << move.dest();
 }
 
-void Checkers::Board::Move::validate() const {
-  if(!is_diagonal()) throw std::invalid_argument("Movement must be diagonal!");
-  if(!dest_.empty()) throw std::invalid_argument("Destiny spot not empty!");
+void Checkers::Board::Move::check_kill() {
+  // Check for piece to kill
+  if(source_.piece() && source_.piece()->allows_bishop_movement() && is_diagonal()) {
+    Spot& next_spot = board_.delta(dest_, -x_delta()/2, -y_delta()/2);
+    if(next_spot.piece()) killed_ = &next_spot;
+  }
+  else if(abs(x_delta()) == 2 && abs(y_delta()) == 2) {
+    Spot& next_spot = board_.delta(source_, x_delta()/2, y_delta()/2);
+    if(next_spot.piece()) killed_ = &next_spot;
+  }
+}
+
+void Checkers::Board::Move::validate() {
   if(source_.empty()) throw std::invalid_argument("No piece to move!");
+  if(!dest_.empty()) throw std::invalid_argument("Destiny spot not empty!");
+  if(!is_diagonal()) throw std::invalid_argument("Movement must be diagonal!");
 
-  if(!source_.piece()->allows_backwards() && backwards()) throw std::invalid_argument("That piece cannot move backwards.");
+  if(!source_.piece()->allows_backwards() && backwards()) throw std::invalid_argument("That piece cannot move backwards!");
 
+  check_kill();
   if(killed_) return;
 
-  if(!source_.piece()->allows_bishop_movement() && abs(y_delta()) != 1) throw std::invalid_argument("That piece cannot move more than one diagonal unit.");
+  if(!source_.piece()->allows_bishop_movement() && abs(y_delta()) != 1) throw std::invalid_argument("That piece cannot move more than one diagonal unit!");
 }
 
 void Checkers::Board::Move::perform() {
+  // Perform movement
+  validate();
   source_ >> dest_;
   kill();
+  // Promote piece, if necessary
+  if((dest_.piece()->color() == Piece::ColorType::dark && dest_.y() == S-1) ||
+     (dest_.piece()->color() == Piece::ColorType::light && dest_.y() == 0) ) {
+    dest_.promote_piece();
+  }
 }
 
 vector<typename Checkers::Board::Move> Checkers::Board::valid_moves_from(size_t xs, size_t ys) {
@@ -99,39 +119,14 @@ vector<typename Checkers::Board::Move> Checkers::Board::valid_moves_from(size_t 
   Spot source = spot(xs, ys);
   for(int x = 0; x != S; ++x) {
     for(int y = 0; y != S; ++y) {
-      Move move(source, spot(x,y));
+      Move move(source, spot(x,y), *this);
       try {
         move.validate();
         valid_moves.push_back(move);
-      } catch(std::invalid_argument& e) {}
+      } catch(std::invalid_argument& e) { /* Do nothing */ }
     }
   }
   return valid_moves;
-}
-
-void Checkers::Board::move(std::string src, std::string des) {
-  Move movement(spot(src), spot(des));
-  move(movement);
-}
-
-void Checkers::Board::move(typename Checkers::Board::Move& m) {
-  // Check for piece to kill
-  if(m.source().piece() && m.source().piece()->allows_bishop_movement() && m.is_diagonal()) {
-    Spot& next_spot = delta(m.dest_ref(), -m.x_delta()/2, -m.y_delta()/2);
-    if(next_spot.piece()) m.set_killed(&next_spot);
-  }
-  else if(abs(m.x_delta()) == 2 && abs(m.y_delta()) == 2) {
-    Spot& next_spot = delta(m.source_ref(), m.x_delta()/2, m.y_delta()/2);
-    if(next_spot.piece()) m.set_killed(&next_spot);
-  }
-  // Perform movement
-  m.validate();
-  m.perform();
-  // Promote piece, if necessary
-  if((m.dest().piece()->color() == Piece::ColorType::dark && m.dest().y() == S-1) ||
-     (m.dest().piece()->color() == Piece::ColorType::light && m.dest().y() == 0) ) {
-    m.dest_ref().promote_piece();
-  }
 }
 
 typename Checkers::Board::Spot& Checkers::Board::spot(std::string pos) {

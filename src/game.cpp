@@ -35,5 +35,5 @@ void Checkers::Game::play() {
   if(move.source().piece() && move.source().piece()->color() != current->piece_color())
     throw std::invalid_argument("Invalid piece, you must move one of your own!"); 
   // Perform movement
-  board_.move(move);
+  move.perform();
 }
