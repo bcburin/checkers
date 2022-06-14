@@ -60,10 +60,12 @@ ostream& operator<< (ostream& os, Checkers::Board& board) {
       os << std::endl;
     }
     for(int x = 0; x != S; ++x) os << (x ? " " : "| ") << board.spot(x,y).piece() << "|";
-    os << std::endl;
+    os << " " << y+1 << std::endl;
     for(int x = 0; x != S; ++x) os << (x ? "-" : "|-") << "-" << "-|";
     os << std::endl;
   }
+  for(int x = 0; x != S; ++x) os << (x ? " " : "  ") << (char)('a'+x) << "  ";
+  os << std::endl;
   return os;
 }
 
@@ -114,9 +116,12 @@ void Checkers::Board::move(std::string src, std::string des) {
 
 void Checkers::Board::move(typename Checkers::Board::Move& m) {
   // Check for piece to kill
-  if(abs(m.x_delta()) == 2 && abs(m.y_delta()) == 2) {
-    Spot& src = spot(m.source().x(), m.source().y());
-    Spot& next_spot = delta(src, m.x_delta()/2, m.y_delta()/2);
+  if(m.source().piece() && m.source().piece()->allows_bishop_movement() && m.is_diagonal()) {
+    Spot& next_spot = delta(m.dest_ref(), -m.x_delta()/2, -m.y_delta()/2);
+    if(next_spot.piece()) m.set_killed(&next_spot);
+  }
+  else if(abs(m.x_delta()) == 2 && abs(m.y_delta()) == 2) {
+    Spot& next_spot = delta(m.source_ref(), m.x_delta()/2, m.y_delta()/2);
     if(next_spot.piece()) m.set_killed(&next_spot);
   }
   // Perform movement
