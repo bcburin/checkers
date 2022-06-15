@@ -138,6 +138,8 @@ namespace Checkers {
           Spot source() const { return source_; }
           
           Spot dest() const { return dest_; }
+
+          bool has_killed() const { return killed_ != nullptr; }
           
           void validate();
 

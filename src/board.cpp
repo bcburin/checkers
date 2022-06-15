@@ -81,11 +81,13 @@ void Checkers::Board::Move::check_kill() {
   // Check for piece to kill
   if(source_.piece() && source_.piece()->allows_bishop_movement() && is_diagonal()) {
     Spot& next_spot = board_.delta(dest_, -x_delta()/2, -y_delta()/2);
-    if(next_spot.piece()) killed_ = &next_spot;
+    if(next_spot.piece() && next_spot.piece()->color() != source_.piece()->color()) 
+      killed_ = &next_spot;
   }
   else if(abs(x_delta()) == 2 && abs(y_delta()) == 2) {
     Spot& next_spot = board_.delta(source_, x_delta()/2, y_delta()/2);
-    if(next_spot.piece()) killed_ = &next_spot;
+    if(next_spot.piece() && next_spot.piece()->color() != source_.piece()->color()) 
+      killed_ = &next_spot;
   }
 }
 
@@ -116,7 +118,7 @@ void Checkers::Board::Move::perform() {
 
 vector<typename Checkers::Board::Move> Checkers::Board::valid_moves_from(size_t xs, size_t ys) {
   vector<Move> valid_moves;
-  Spot source = spot(xs, ys);
+  Spot& source = spot(xs, ys);
   for(int x = 0; x != S; ++x) {
     for(int y = 0; y != S; ++y) {
       Move move(source, spot(x,y), *this);
