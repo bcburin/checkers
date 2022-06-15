@@ -5,17 +5,11 @@
 
 #include "game.h"
 
-using std::cout;
-using std::cin;
-using std::endl;
-using std::vector;
-using std::string;
-
 
 int main() {
   Checkers::Board board;
 
-  Checkers::Game game(Checkers::Game::Type::Human_Human);
+  Checkers::Game game(Checkers::Game::Type::Human_AI);
 
   while(!game.finished()) {
     bool valid_move = false;

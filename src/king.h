@@ -11,7 +11,7 @@ namespace Checkers {
       King* copy() const override { return new King(color_); };
       bool allows_backwards() const override { return true; }
       bool allows_bishop_movement() const override { return true; }
-      std::string str() const override { return (color() == ColorType::dark) ? "**" : "++"; }
+      std::string str() const override { return "+"; }
   };
 
 };

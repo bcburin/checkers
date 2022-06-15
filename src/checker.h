@@ -12,7 +12,7 @@ namespace Checkers {
       Checker* copy() const override { return new Checker(color_); };
       bool allows_backwards() const override { return false; }
       bool allows_bishop_movement() const override { return false; }
-      std::string str() const override { return (color() == ColorType::dark) ? "* " : "+ "; }
+      std::string str() const override { return "o"; }
   };
 
 };

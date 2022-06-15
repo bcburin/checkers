@@ -10,6 +10,7 @@
 #include "piece.h"
 #include "checker.h"
 #include "king.h"
+#include "color.h"
 
 #define S 8
 // #define DELETE_ANSI "\x1b[17A"
@@ -31,8 +32,7 @@ namespace Checkers {
 
           Piece* piece_;
 
-          /* Checks validity of spot coordinates;
-           * 
+          /* Checks validity of spot coordinates.
            */
           bool valid() { return 0 <= x_ && x_ < S && 0 <= y_ && y_ < S; }
 
@@ -95,6 +95,8 @@ namespace Checkers {
           Spot& insert_piece(Piece* piece) { remove_piece(); piece_ = piece; return *this; }
 
           void promote_piece();
+
+          COLOR16 color_w32() const { return (color() == ColorType::dark) ? DARK_SPOT_COLOR : LIGHT_SPOT_COLOR; }
       };
 
       class Move {

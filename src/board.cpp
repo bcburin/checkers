@@ -1,6 +1,10 @@
 #include "board.h"
 #include <sstream>
 
+#define FORE_BEIGE (FOREGROUND_RED | FOREGROUND_GREEN)
+#define BACK_BEIGE (BACKGROUND_RED | BACKGROUND_GREEN)
+#define BACK_BLACK 0
+
 typename Checkers::Board::Spot& Checkers::Board::Spot::operator<< (Spot& other) { 
   remove_piece(); 
   piece_ = other.retrive_piece(); 
@@ -55,17 +59,29 @@ void Checkers::Board::print(ostream& os, bool first_time) {
 
 ostream& operator<< (ostream& os, Checkers::Board& board) {
   for(int y = S-1; y != -1; --y) {
-    if(y == S-1) {
-      for(int x = 0; x != S; ++x) os << (x ? "-" : "|-") << "-" << "-|";
-      os << std::endl;
+    for(int x = 0; x != S; ++x) {
+      set_color(board.spot(x,y).color_w32());
+      os << "       ";
     }
-    for(int x = 0; x != S; ++x) os << (x ? " " : "| ") << board.spot(x,y).piece() << "|";
-    os << " " << y+1 << std::endl;
-    for(int x = 0; x != S; ++x) os << (x ? "-" : "|-") << "-" << "-|";
+    os << std::endl;
+    for(int x = 0; x != S; ++x) {
+      auto piece = board.spot(x,y).piece();
+      set_color(board.spot(x,y).color_w32() | (piece ? piece->color_w32() : 0));
+      os << "   " << piece << "   ";
+    }
+    set_color(WRITING_COLOR);
+    os << "   " << y+1 << std::endl;
+    for(int x = 0; x != S; ++x) {
+      set_color(board.spot(x,y).color_w32());
+      os << "       ";
+    }
     os << std::endl;
   }
-  for(int x = 0; x != S; ++x) os << (x ? " " : "  ") << (char)('a'+x) << "  ";
   os << std::endl;
+  set_color(WRITING_COLOR);
+  for(int x = 0; x != S; ++x) os << "   " << (char)('a'+x) << "   ";
+  os << std::endl;
+  reset_color();
   return os;
 }
 
