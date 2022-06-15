@@ -38,4 +38,5 @@ void Checkers::Game::play() {
     throw std::invalid_argument("Invalid piece, you must move one of your own!"); 
   // Perform movement
   move.perform();
+  next_player();
 }
