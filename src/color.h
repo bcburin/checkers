@@ -15,4 +15,6 @@ void set_color(COLOR16 color);
 
 void reset_color();
 
+void clear_console();
+
 #endif

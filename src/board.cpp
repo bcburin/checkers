@@ -54,6 +54,7 @@ Checkers::Board::Board() {
 }
 
 void Checkers::Board::print(ostream& os, bool first_time) {
+  clear_console();
   os << *this;
 }
 

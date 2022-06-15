@@ -15,14 +15,12 @@ void print_mode_options();
 void print_color_options();
 void print_border();
 void print(std::invalid_argument& error);
-void clear_console();
 
 
 int main() {
 
   // Input game mode
   Checkers::Game::Type mode;
-  clear_console();
   print_mode_options();
   bool valid_input = false;
   while(!valid_input) {
@@ -33,7 +31,6 @@ int main() {
   // Input color (if singleplayer)
   Checkers::Piece::ColorType color = Checkers::Piece::ColorType::dark;
   if(mode == Checkers::Game::Type::Human_AI) {
-    clear_console();
     print_color_options();
     valid_input = false;
     while(!valid_input) {
@@ -47,9 +44,8 @@ int main() {
 
   // Game loop
   while(!game.finished()) {
-    valid_input = false;
-    clear_console();
     game.board().print();
+    valid_input = false;
     while(!valid_input) {
       try { game.play(); valid_input = true; }
       catch(std::invalid_argument& error) { print(error); }
@@ -61,6 +57,7 @@ int main() {
 
 
 void print_mode_options() {
+  clear_console();
   set_color(WRITING_COLOR);
   print_border();
   std::cout << "How many players?" << std::endl << std::endl;
@@ -72,6 +69,7 @@ void print_mode_options() {
 }
 
 void print_color_options() {
+  clear_console();
   set_color(WRITING_COLOR);
   print_border();
   std::cout << "What color will you play?" << std::endl << std::endl;
@@ -119,7 +117,5 @@ void print(std::invalid_argument& error) {
   std::cerr << std::endl << error.what() << std::endl << std::endl;
   reset_color();
 }
-
-void clear_console() { if(system("CLS")) system("clear"); }
 
 void print_border() { std::cout << std::endl << "------------------------------------------------" << std::endl << std::endl; }
