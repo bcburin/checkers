@@ -10,10 +10,12 @@ Checkers::Game::Game(Type type, Piece::ColorType p1_color) {
       player2 = new HumanPlayer("Player 2", p2_color, board_, std::cin);
       break;
     case Type::Human_AI:
-      // Not implemented yet
+      player1 = new HumanPlayer("Player", p1_color, board_, std::cin);
+      player2 = new AIPlayer("AI", p2_color, board_);
       break;
     case Type::AI_AI:
-      // Not implemented yet
+      player1 = new AIPlayer("AI 1", p1_color, board_);
+      player2 = new AIPlayer("AI 2", p2_color, board_);
       break;
   }
 

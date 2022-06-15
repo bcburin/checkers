@@ -3,6 +3,7 @@
 
 #include "board.h"
 #include "human_player.h"
+#include "ai_player.h"
 
 namespace Checkers {
 
