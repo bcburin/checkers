@@ -160,22 +160,20 @@ namespace Checkers {
 
       Board();
 
-      // TODO: validate input
-      Spot& spot(size_t x, size_t y) { return spot_[x][y]; }
+      Spot& spot(size_t x, size_t y) { validate_spot(x,y); return spot_[x][y]; }
 
-      // TODO: validate input
       Spot& spot(std::string pos);
 
       /* Returns reference to the spot dx units up and dy units right
        * Allows negative and posive deltas from src
-       * TODO: validate input
        */
       Spot& delta(Spot& src, int dx, int dy) { return spot(src.x() + dx, src.y() + dy); }
 
-      // TODO: validate input
       vector<Move> valid_moves_from(size_t x, size_t y);
 
       void print(ostream& os = std::cout, bool first_time = false);
+
+      void validate_spot(size_t x, size_t y) const { if(x >= S || y >= S) throw std::invalid_argument("Out of bounds!"); }
 
   };
 
