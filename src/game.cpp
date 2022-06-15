@@ -19,7 +19,7 @@ Checkers::Game::Game(Type type, Piece::ColorType p1_color) {
       break;
   }
 
-  current = player1;
+  current = (p1_color == Piece::ColorType::dark) ? player1 : player2;
 }
 
 Checkers::Game::~Game() {
