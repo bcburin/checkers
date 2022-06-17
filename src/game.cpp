@@ -28,7 +28,16 @@ Checkers::Game::~Game() {
 }
 
 bool Checkers::Game::finished() {
-  return player1->num_pieces() == 0 || player2->num_pieces() == 0;
+  Player* winner = nullptr;
+  if(player1->num_pieces() == 0) winner = player2;
+  if(player2->num_pieces() == 0) winner = player1;
+  if(winner) {
+    board_.print();
+    set_color(Checker(winner->piece_color()).color_w32());
+    std::cout << std::endl << winner->name() << " wins!" << std::endl;
+    reset_color();
+  }
+  return winner != nullptr;
 }
 
 void Checkers::Game::play() {
